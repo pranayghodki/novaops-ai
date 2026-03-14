@@ -4,7 +4,6 @@ from ai import ask_nova
 
 app = FastAPI()
 
-# Enable CORS so React frontend can call backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,34 +13,14 @@ app.add_middleware(
 )
 
 @app.get("/")
-def home():
+def root():
     return {"message": "NovaOps AI running"}
-
 
 @app.get("/analyze")
 def analyze(log: str):
 
-    prompt = f"""
-You are an expert Kubernetes DevOps engineer.
+    result = ask_nova(log)
 
-Analyze the following error and respond in this format:
-
-1. Problem
-Explain what the error means.
-
-2. Possible Causes
-List common reasons why this happens.
-
-3. Diagnosis Commands
-Give kubectl commands to investigate.
-
-4. Fix Commands
-Give exact kubectl commands to fix the issue.
-
-Error:
-{log}
-"""
-
-    result = ask_nova(prompt)
-
-    return {"result": result}
+    return {
+        "result": result
+    }

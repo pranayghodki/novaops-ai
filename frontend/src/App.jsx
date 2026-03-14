@@ -1,47 +1,154 @@
 import { useState } from "react";
 
 function App() {
+
   const [log, setLog] = useState("");
   const [result, setResult] = useState("");
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const analyzeLog = async () => {
+
+    setLoading(true);
+
     const response = await fetch(
       "http://127.0.0.1:8000/analyze?log=" + encodeURIComponent(log)
     );
 
     const data = await response.json();
 
-    console.log(data); // debugging
+    setResult(data.result);
+    setLoading(false);
+  };
 
-    const text =
-      data.result.output.message.content[0].text;
+  const analyzeFile = async () => {
 
-    setResult(text);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setLoading(true);
+
+    const response = await fetch("http://127.0.0.1:8000/analyze-file", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+
+    setResult(data.result);
+    setLoading(false);
   };
 
   return (
-    <div style={{ padding: "40px", fontFamily: "Arial" }}>
-     <h1>NovaOps AI — DevOps Troubleshooting Assistant</h1>
-<p>Paste your Kubernetes / DevOps error below and get AI-powered fixes.</p>
-      <textarea
-        rows="6"
-        cols="60"
-        placeholder="Paste DevOps error here..."
-        value={log}
-        onChange={(e) => setLog(e.target.value)}
-      />
+    <div style={{
+      minHeight:"100vh",
+      background:"linear-gradient(135deg,#0f2027,#203a43,#2c5364)",
+      display:"flex",
+      justifyContent:"center",
+      alignItems:"center",
+      fontFamily:"Segoe UI"
+    }}>
 
-      <br /><br />
+      <div style={{
+        width:"900px",
+        padding:"40px",
+        borderRadius:"20px",
+        background:"rgba(255,255,255,0.05)",
+        backdropFilter:"blur(10px)",
+        boxShadow:"0 20px 60px rgba(0,0,0,0.6)",
+        color:"white"
+      }}>
 
-<input type="file" />
+        <h1 style={{
+          textAlign:"center",
+          fontSize:"38px",
+          background:"linear-gradient(90deg,#00f2fe,#4facfe)",
+          WebkitBackgroundClip:"text",
+          color:"transparent"
+        }}>
+          NovaOps AI
+        </h1>
 
-      <button onClick={analyzeLog}>Analyze</button>
+        <p style={{textAlign:"center",opacity:"0.8"}}>
+          AI Powered DevOps Troubleshooting Assistant
+        </p>
 
-      <h3>Result</h3>
+        <textarea
+          rows="6"
+          placeholder="Paste Kubernetes / DevOps error log..."
+          value={log}
+          onChange={(e) => setLog(e.target.value)}
+          style={{
+            width:"100%",
+            padding:"15px",
+            borderRadius:"10px",
+            border:"none",
+            marginTop:"20px",
+            background:"#111",
+            color:"#0f0",
+            fontFamily:"monospace"
+          }}
+        />
 
-      <pre style={{background:"black",color:"lime",padding:"20px"}}>
-{result}
-</pre>
+        <br/><br/>
+
+        <input
+          type="file"
+          onChange={(e)=>setFile(e.target.files[0])}
+          style={{color:"white"}}
+        />
+
+        <br/><br/>
+
+        <button
+          onClick={analyzeLog}
+          style={{
+            padding:"12px 25px",
+            borderRadius:"8px",
+            border:"none",
+            background:"#00c6ff",
+            color:"black",
+            fontWeight:"bold",
+            cursor:"pointer"
+          }}
+        >
+          Analyze Text
+        </button>
+
+        <button
+          onClick={analyzeFile}
+          style={{
+            padding:"12px 25px",
+            borderRadius:"8px",
+            border:"none",
+            background:"#00ff9d",
+            marginLeft:"10px",
+            fontWeight:"bold",
+            cursor:"pointer"
+          }}
+        >
+          Analyze File
+        </button>
+
+        <h3 style={{marginTop:"30px"}}>Result</h3>
+
+        {loading && (
+          <p style={{color:"#00f2fe"}}>Analyzing with AI...</p>
+        )}
+
+        <pre style={{
+          background:"#000",
+          color:"#00ff9d",
+          padding:"20px",
+          borderRadius:"10px",
+          maxHeight:"300px",
+          overflow:"auto"
+        }}>
+          {result}
+        </pre>
+
+      </div>
+
     </div>
   );
 }

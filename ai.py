@@ -13,7 +13,21 @@ def ask_nova(prompt):
             {
                 "role": "user",
                 "content": [
-                    {"text": prompt}
+                    {
+                        "text": f"""
+You are a DevOps expert.
+
+Analyze the following Kubernetes or DevOps error log and provide:
+
+1. Issue
+2. Possible causes
+3. Fix steps
+4. Useful kubectl or docker commands
+
+Log:
+{prompt}
+"""
+                    }
                 ]
             }
         ]
@@ -26,5 +40,8 @@ def ask_nova(prompt):
         accept="application/json"
     )
 
-    result = json.loads(response["body"].read())
+    response_body = json.loads(response["body"].read())
+
+    result = response_body["output"]["message"]["content"][0]["text"]
+
     return result
